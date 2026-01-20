@@ -1,9 +1,12 @@
 package main
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 )
+
+var tmplMain = template.Must(template.ParseFiles("template/index.html"))
 
 func main() {
 	// Подключаем статические файлы (включая favicon.ico)
@@ -12,11 +15,12 @@ func main() {
 
 	// Главная страница
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
+		// Начальная загрузка — просто отдаём HTML с пустой таблицей или с данными (можно пустую)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := tmplMain.Execute(w, struct{ ShowResp bool }{ShowResp: r.URL.Query().Get("mode") == "resp"}); err != nil {
+			http.Error(w, "Template error", http.StatusInternalServerError)
+			log.Println("Template execute error:", err)
 		}
-		http.ServeFile(w, r, "./templates/index.html")
 	})
 
 	log.Println("Сервер запущен на http://localhost:8080")
