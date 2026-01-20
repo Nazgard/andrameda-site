@@ -7,6 +7,7 @@ import (
 )
 
 var tmplMain = template.Must(template.ParseFiles("template/index.html"))
+var robots = template.Must(template.ParseFiles("static/robots.txt"))
 
 func main() {
 	// Подключаем статические файлы (включая favicon.ico)
@@ -18,6 +19,14 @@ func main() {
 		// Начальная загрузка — просто отдаём HTML с пустой таблицей или с данными (можно пустую)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		if err := tmplMain.Execute(w, struct{ ShowResp bool }{ShowResp: r.URL.Query().Get("mode") == "resp"}); err != nil {
+			http.Error(w, "Template error", http.StatusInternalServerError)
+			log.Println("Template execute error:", err)
+		}
+	})
+
+	http.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		if err := robots.ExecuteTemplate(w, "robots.txt", nil); err != nil {
 			http.Error(w, "Template error", http.StatusInternalServerError)
 			log.Println("Template execute error:", err)
 		}

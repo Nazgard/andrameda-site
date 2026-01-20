@@ -28,7 +28,7 @@ FROM scratch
 
 # Копируем только исполняемый файл из этапа сборки
 COPY --from=builder /app/site /site
-COPY --from=builder /app/templates/* /templates/
+COPY --from=builder /app/template/* /template/
 COPY --from=builder /app/static/* /static/
 
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
